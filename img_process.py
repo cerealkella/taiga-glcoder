@@ -41,7 +41,7 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
             c = canvas.Canvas(sig_tmp_filename, pagesize=page.cropBox)
             c.drawImage(signature, x1, y1, width, height, mask='auto')
             if text != "" and text is not None:
-                c.drawString(x1 + 20, y1 + 32, text)  # text above signature
+                c.drawString(x1, y1 + 32, text)  # text above signature
             if sigdate:
                 c.drawString(x1, y1,
                              datetime.datetime.now().strftime("%Y-%m-%d"))
@@ -79,11 +79,23 @@ def sign_image(img_file, signature, text):
     return output_filename
 
 
+def _create_sig(signature):
+    img = Image.new('RGBA', (735, 150))
+    draw = ImageDraw.Draw(img)
+    sigfont = ImageFont.truetype("fonts/HoneyScript-SemiBold.ttf", 70)
+    draw.text((20, 30), signature, (0, 0, 0), font=sigfont)
+    outputfile = "signature.png"
+    img.save(outputfile, 'PNG')
+    return outputfile
+
+
 def sign_invoice(input_file, sig_name, text):
     filename, file_extension = path.splitext(input_file)
     if file_extension.lower() == ".pdf":
-        sign_pdf(input_file, "signature.png", text, "1x125x735x150x40")
+        sigfile = _create_sig(sig_name)
+        sign_pdf(input_file, sigfile, text, "1x125x735x150x40")
     else:
         sign_image(input_file, sig_name, text)
 
 # sign_invoice("amztest.png", "4144144 - $33.44")
+# _create_sig("Mr. Test Van Testerson")
