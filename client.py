@@ -70,15 +70,16 @@ userstories = []
 # print(response.json())
 for i in response.json():
     # print(i)
-    userstories.append(i['id'])
+    # append UserStory ID and Assigned To tuple
+    userstories.append((i['id'], i['assigned_to_extra_info']['full_name_display']))
 print(userstories)
 
 for u in userstories:
     attachUrl = SERVER_NAME + "api/v1/userstories/attachments?object_id=" + \
-        str(u) + "&project=" + str(project)
+        str(u[0]) + "&project=" + str(project)
     attachmentResponse = get(attachUrl, headers=head)
     attrUrl = SERVER_NAME + "api/v1/userstories/custom-attributes-values/" \
-        + str(u)
+        + str(u[0])
     glcodeResponse = get(attrUrl, headers=head)
     print(glcodeResponse.json())
     if GL_CODE_CUSTOM_KEY in glcodeResponse.json()['attributes_values']:
@@ -88,9 +89,10 @@ for u in userstories:
                             ['attributes_values'][GL_AMT_CUSTOM_KEY]))
         gltext = _format_gl_text(gls, amts)
         # print(gltext)
+        doc_signer = u[1]
         for i in attachmentResponse.json():
             print('url ' + i['url'])
             unsigned_inv = download(i['url'])
-            sign_invoice(unsigned_inv, gltext)
+            sign_invoice(unsigned_inv, doc_signer, gltext)
     else:
         print("Amount or GL Code missing!")

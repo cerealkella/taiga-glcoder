@@ -1,6 +1,5 @@
 from os import path, remove
-from pgmagick import Image, CompositeOperator as co, DrawableText, \
-            DrawableList, Color, Geometry
+from PIL import Image, ImageFont, ImageDraw
 import time
 import tempfile
 import PyPDF2
@@ -68,33 +67,23 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
         remove(sig_tmp_filename)
 
 
-def sign_image(img, signature, text):
-    base = Image(img)
-    base.resize('2550x3300')
-    sig = Image(signature)
-
-    layer = Image(Geometry(2550, 3300), Color("transparent"))
-    layer.fontPointsize(40)
-    # im.font("/var/lib/defoma/x-ttcidfont-conf.d/dirs/TrueType/UnBatang.ttf")
-    # text = DrawableText(30, 250, text)
-    text = DrawableText(880, 480, text)
-    drawlist = DrawableList()
-    drawlist.append(text)
-    layer.draw(drawlist)
-    layer.composite(sig, 850, 300, co.OverCompositeOp)
-    base.composite(layer, 0, 0, co.OverCompositeOp)
-    base.resize('35%')
-    base.sharpen(1.0)
-    output_filename = _get_output_filename(img)
-    base.write(output_filename)
+def sign_image(img_file, signature, text):
+    img = Image.open(img_file)
+    draw = ImageDraw.Draw(img)
+    glfont = ImageFont.truetype("fonts/Roboto-Black.ttf", 16)
+    sigfont = ImageFont.truetype("fonts/HoneyScript-SemiBold.ttf", 40)
+    draw.text((200, 10), signature, (0, 0, 0), font=sigfont)
+    draw.text((200, 50), text, (0, 0, 200), font=glfont)
+    output_filename = _get_output_filename(img_file)
+    img.save(output_filename)
     return output_filename
 
 
-def sign_invoice(input_file, text):
+def sign_invoice(input_file, sig_name, text):
     filename, file_extension = path.splitext(input_file)
     if file_extension.lower() == ".pdf":
         sign_pdf(input_file, "signature.png", text, "1x125x735x150x40")
     else:
-        sign_image(input_file, "signature.png", text)
+        sign_image(input_file, sig_name, text)
 
 # sign_invoice("amztest.png", "4144144 - $33.44")
