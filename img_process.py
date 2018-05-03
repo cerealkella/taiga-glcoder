@@ -65,6 +65,7 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
             handle.close()
     if sig_tmp_filename:
         remove(sig_tmp_filename)
+    return output_filename
 
 
 def sign_image(img_file, signature, text):
@@ -93,9 +94,10 @@ def sign_invoice(input_file, sig_name, text):
     filename, file_extension = path.splitext(input_file)
     if file_extension.lower() == ".pdf":
         sigfile = _create_sig(sig_name)
-        sign_pdf(input_file, sigfile, text, "1x125x735x150x40")
+        signed_file = sign_pdf(input_file, sigfile, text, "1x125x735x150x40")
     else:
-        sign_image(input_file, sig_name, text)
+        signed_file = sign_image(input_file, sig_name, text)
+    return signed_file
 
 # sign_invoice("amztest.png", "4144144 - $33.44")
 # _create_sig("Mr. Test Van Testerson")
