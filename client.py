@@ -51,6 +51,16 @@ def download(url, download_dir=None):
         file.write(response.content)
         return file_name
 
+def upload_us_attach(userstory_id, filename, project):
+    files = {"attached_file": open(filename, 'rb')}
+    values = {"from_comment": "False",
+             "object_id": str(userstory_id),
+             "project": str(project),
+             "description": "Signed Invoice"}
+
+    attachUrl = SERVER_NAME + "api/v1/userstories/attachments"
+    attachmentResponse = post(attachUrl, headers=head, files=files, data=values)
+
 
 # Get Project ID
 myUrl = SERVER_NAME + 'api/v1/projects'
@@ -71,7 +81,8 @@ userstories = []
 for i in response.json():
     # print(i)
     # append UserStory ID and Assigned To tuple
-    userstories.append((i['id'], i['assigned_to_extra_info']['full_name_display']))
+    userstories.append((i['id'],
+                        i['assigned_to_extra_info']['full_name_display']))
 print(userstories)
 
 for u in userstories:
@@ -93,6 +104,7 @@ for u in userstories:
         for i in attachmentResponse.json():
             print('url ' + i['url'])
             unsigned_inv = download(i['url'])
-            sign_invoice(unsigned_inv, doc_signer, gltext)
+            signed_doc = sign_invoice(unsigned_inv, doc_signer, gltext)
+            upload_us_attach(u[0], signed_doc, project)
     else:
         print("Amount or GL Code missing!")
