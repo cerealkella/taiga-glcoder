@@ -1,6 +1,6 @@
 from requests import *
 from urllib.parse import urlparse
-from os import path, getcwd, makedirs
+from os import path, makedirs
 from img_process import sign_invoice
 from api_token import get_header
 from local_settings import GL_AMT_CUSTOM_KEY, GL_CODE_CUSTOM_KEY, \
@@ -31,9 +31,11 @@ def _format_gl_text(gl_list, amt_list):
 
 
 def download(url, download_dir=None):
-    # open in binary mode
+    # Using line below to find the realpath. path.getcwd()
+    # was not working properly for when running from cron
+    actual_path = os.path.dirname(os.path.realpath(__file__))
     if download_dir is None:
-        download_dir = getcwd() + "/downloads/"
+        download_dir = actual_path + "/downloads/"
         if not path.isdir(download_dir):
             # Create Download Directory
             makedirs(download_dir)
