@@ -51,15 +51,25 @@ def download(url, download_dir=None):
         file.write(response.content)
         return file_name
 
+
 def upload_us_attach(userstory_id, filename, project):
     files = {"attached_file": open(filename, 'rb')}
     values = {"from_comment": "False",
-             "object_id": str(userstory_id),
-             "project": str(project),
-             "description": "Signed Invoice"}
+              "object_id": str(userstory_id),
+              "project": str(project),
+              "description": "Signed Invoice"}
 
     attachUrl = SERVER_NAME + "api/v1/userstories/attachments"
-    attachmentResponse = post(attachUrl, headers=head, files=files, data=values)
+    attachmentResponse = post(attachUrl, headers=head,
+                              files=files, data=values)
+
+
+def change_status(userstory_id, version):
+    values = {"version": str(version),
+              "status": str(KANBAN_COLUMN_ID + 1)}
+    us_url = SERVER_NAME + "api/v1/userstories/" + str(userstory_id)
+    usResponse = patch(us_url, headers=head, data=values)
+    print(usResponse)
 
 
 # Get Project ID
@@ -82,7 +92,8 @@ for i in response.json():
     # print(i)
     # append UserStory ID and Assigned To tuple
     userstories.append((i['id'],
-                        i['assigned_to_extra_info']['full_name_display']))
+                        i['assigned_to_extra_info']['full_name_display'],
+                        i['version']))
 print(userstories)
 
 for u in userstories:
@@ -106,5 +117,6 @@ for u in userstories:
             unsigned_inv = download(i['url'])
             signed_doc = sign_invoice(unsigned_inv, doc_signer, gltext)
             upload_us_attach(u[0], signed_doc, project)
+            change_status(u[0], u[2])
     else:
         print("Amount or GL Code missing!")
