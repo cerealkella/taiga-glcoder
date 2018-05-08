@@ -13,7 +13,7 @@ print(head)
 
 def _parse_list(input_string):
     new_list = input_string.replace(" ", ""). \
-        replace(";", ",").replace("|", ",").split(",")
+        replace(";", "|").split("|")
     return new_list
 
 
