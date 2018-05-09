@@ -38,7 +38,7 @@ def _format_gl_text(gl_list, amt_list):
 
 def download(url, download_dir=None):
     if download_dir is None:
-        download_dir = actual_path + "/downloads/"
+        download_dir = getcwd() + "/downloads/"
         print(download_dir)
         if not path.isdir(download_dir):
             # Create Download Directory
