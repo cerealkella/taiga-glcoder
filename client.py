@@ -1,6 +1,6 @@
 from requests import *
 from urllib.parse import urlparse
-from os import path, makedirs
+from os import path, makedirs, chdir, getcwd
 from img_process import sign_invoice
 from api_token import get_header
 from local_settings import GL_AMT_CUSTOM_KEY, GL_CODE_CUSTOM_KEY, \
@@ -9,6 +9,12 @@ from local_settings import GL_AMT_CUSTOM_KEY, GL_CODE_CUSTOM_KEY, \
 # Get API Token and Header
 head = get_header()
 print(head)
+
+
+# Set working Directory
+def set_working_directory():
+    if getcwd() != chdir(path.dirname(path.realpath(__file__))):
+        chdir(path.dirname(path.realpath(__file__)))
 
 
 def _parse_list(input_string):
@@ -31,11 +37,9 @@ def _format_gl_text(gl_list, amt_list):
 
 
 def download(url, download_dir=None):
-    # Using line below to find the realpath. path.getcwd()
-    # was not working properly for when running from cron
-    actual_path = os.path.dirname(os.path.realpath(__file__))
     if download_dir is None:
         download_dir = actual_path + "/downloads/"
+        print(download_dir)
         if not path.isdir(download_dir):
             # Create Download Directory
             makedirs(download_dir)
@@ -74,6 +78,7 @@ def change_status(userstory_id, version):
     print(usResponse)
 
 
+set_working_directory()
 # Get Project ID
 myUrl = SERVER_NAME + 'api/v1/projects'
 response = get(myUrl, headers=head)
