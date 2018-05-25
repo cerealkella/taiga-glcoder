@@ -42,9 +42,9 @@ def upload():
     print (attachmentResponse)
 
 
-def change_status(userstory_id):
-    values = {"version": "4",
-              "status": "35"}
+def change_status(userstory_id, version):
+    values = {"version": str(version),
+              "status": str(KANBAN_COLUMN_ID + 1)}
     us_url = SERVER_NAME + "api/v1/userstories/" + str(userstory_id)
     usResponse = patch(us_url, headers=head, data=values)
     print(usResponse.text)

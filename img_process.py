@@ -20,7 +20,9 @@ def _get_output_filename(input_file):
 
 
 def sign_pdf(pdf, signature, text, coords, sigdate=False):
-    page_num, x1, y1, width, height = [int(a) for a in coords.split("x")]
+    # for y coord, pass in pixels from top of page, as the logic
+    # of c.drawImage measures from the bottom to the top. I don't know why
+    page_num, x1, y, width, height = [int(a) for a in coords.split("x")]
     page_num -= 1
 
     output_filename = _get_output_filename(pdf)
@@ -29,6 +31,10 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
     sig_tmp_fh = None
 
     pdf = PyPDF2.PdfFileReader(pdf_fh)
+    # Set y1 to pixels from top of page
+    y1 = pdf.getPage(page_num).mediaBox[3] - y
+    print(pdf.getPage(page_num).mediaBox)
+    print(y1)
     writer = PyPDF2.PdfFileWriter()
     sig_tmp_filename = None
 
@@ -41,9 +47,9 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
             c = canvas.Canvas(sig_tmp_filename, pagesize=page.cropBox)
             c.drawImage(signature, x1, y1, width, height, mask='auto')
             if text != "" and text is not None:
-                c.drawString(x1, y1 + 32, text)  # text above signature
+                c.drawString(x1, y1, text)  # text above signature
             if sigdate:
-                c.drawString(x1, y1,
+                c.drawString(x1, y1 - 32,
                              datetime.datetime.now().strftime("%Y-%m-%d"))
             c.showPage()
             c.save()
@@ -84,7 +90,7 @@ def _create_sig(signature):
     img = Image.new('RGBA', (735, 150))
     draw = ImageDraw.Draw(img)
     sigfont = ImageFont.truetype("fonts/HoneyScript-SemiBold.ttf", 70)
-    draw.text((20, 30), signature, (0, 0, 0), font=sigfont)
+    draw.text((20, 30), signature, (0, 0, 200), font=sigfont)
     outputfile = "signature.png"
     img.save(outputfile, 'PNG')
     return outputfile
@@ -94,10 +100,12 @@ def sign_invoice(input_file, sig_name, text):
     filename, file_extension = path.splitext(input_file)
     if file_extension.lower() == ".pdf":
         sigfile = _create_sig(sig_name)
-        signed_file = sign_pdf(input_file, sigfile, text, "1x125x735x150x40")
+        signed_file = sign_pdf(input_file, sigfile, text, "1x125x40x150x40")
+        # signed_file = sign_pdf(input_file, sigfile, text, "1x125x735x150x40")
     else:
         signed_file = sign_image(input_file, sig_name, text)
     return signed_file
 
-# sign_invoice("amztest.png", "4144144 - $33.44")
+
+print(sign_invoice("tester.pdf", "Justin", "4144144 - $33.44"))
 # _create_sig("Mr. Test Van Testerson")
