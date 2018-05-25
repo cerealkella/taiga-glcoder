@@ -107,5 +107,5 @@ def sign_invoice(input_file, sig_name, text):
     return signed_file
 
 
-print(sign_invoice("tester.pdf", "Justin", "4144144 - $33.44"))
+# print(sign_invoice("tester.pdf", "Justin", "4144144 - $33.44"))
 # _create_sig("Mr. Test Van Testerson")
