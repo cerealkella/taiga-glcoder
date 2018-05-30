@@ -32,7 +32,7 @@ def sign_pdf(pdf, signature, text, coords, sigdate=False):
 
     pdf = PyPDF2.PdfFileReader(pdf_fh)
     # Set y1 to pixels from top of page
-    y1 = pdf.getPage(page_num).mediaBox[3] - y
+    y1 = int(pdf.getPage(page_num).mediaBox[3] - y)
     print(pdf.getPage(page_num).mediaBox)
     print(y1)
     writer = PyPDF2.PdfFileWriter()
